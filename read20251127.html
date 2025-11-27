@@ -1,0 +1,1173 @@
+import React, { useState, useEffect } from 'react';
+import { BookOpen, Award, Globe, Leaf, Zap, Heart, Users, Shield, TrendingUp, Cpu, ChevronRight, RefreshCcw, CheckCircle, XCircle, Home, Eye, EyeOff, Lock, Music, Star, RotateCcw, AlertCircle } from 'lucide-react';
+
+// 題目選項全面升級：增加誘答性，去除明顯荒謬的選項，考驗細節理解與推論能力
+const articles = [
+  {
+    id: 1,
+    title: "世界冠軍！台灣棒球的榮耀時刻",
+    category: "國際教育 / 團隊合作",
+    icon: <Award className="w-6 h-6 text-white" />,
+    color: "bg-yellow-500",
+    content: `在2024年11月24日這一天，全台灣的街道似乎都安靜了下來，因為大家的目光都緊緊盯著電視螢幕。台灣棒球代表隊（中華隊）在世界12強棒球賽的冠軍戰中，面對的是擁有強大實力、在國際賽事中已經連續贏了27場的日本隊。最終，中華隊以4比0的成績完封對手，奪下了隊史第一座世界級的冠軍獎盃！這不僅是一場比賽的勝利，更是台灣棒球歷史上最閃耀的一頁。
+
+回想這次的比賽過程，其實充滿了驚奇與感動。在比賽開始之前，許多國外的體育分析師和媒體並不看好中華隊，他們分析數據後認為，我們的實力可能只能排在倒數幾名。面對這些「看衰」的聲音，球員們沒有在網路上打口水戰，也沒有因此感到氣餒。相反地，他們選擇將這些質疑轉化為動力，默默地在球場上揮灑汗水。隊長陳傑憲在受訪時堅定地說：「我們想證明，台灣的棒球是很強的，我們不比任何人差。」這句話，後來成為了感動無數人的金句。
+
+比賽中，我們看到了什麼是真正的「團隊合作」。投手在投手丘上頂住巨大的壓力，投出一顆顆精準的球；野手們則在守備位置上全神貫注，撲接每一個可能落地的險球。即使有人失誤了，隊友們也會立刻拍拍他的肩膀，給予鼓勵而不是責備。這種互相信任的氛圍，是中華隊能夠過關斬將的關鍵。
+
+這場勝利，也產生了一種奇妙的社會力量。在那一刻，無論你是大人還是小孩，無論你原本支持哪一支職棒隊伍，大家都團結在一起，為同一個名字——「台灣」歡呼。便利商店推出了慶祝優惠，街道上充滿了笑容，這種因為體育賽事而凝聚起來的「集體認同感」，讓我們感受到身為這塊土地一份子的驕傲。這告訴我們，體育不只是運動，它更是一種能跨越隔閡、連結人心的共同語言。`,
+    questions: [
+      {
+        question: "根據文章，當面對國外分析師看衰中華隊實力時，球員們採取了什麼樣的應對態度？",
+        options: [
+          "公開在網路上反駁分析師的數據錯誤，捍衛球隊尊嚴。",
+          "選擇完全不看新聞報導，以免心情受到負面影響。",
+          "將外界的質疑轉化為內在動力，專注於球場上的表現。",
+          "為了證明實力，決定採取比較冒險激進的戰術來比賽。"
+        ],
+        answer: 2
+      },
+      {
+        question: "文章提到「投手在投手丘上頂住巨大的壓力」，這裡的壓力主要來自於什麼情境（推論題）？",
+        options: [
+          "面對強大的日本隊且背負著全國人民的期待。",
+          "擔心比賽輸了會拿不到高額的比賽獎金。",
+          "因為天氣炎熱導致體力流失，身體感到不適。",
+          "對於不熟悉的比賽場地感到緊張。"
+        ],
+        answer: 0
+      },
+      {
+        question: "關於這次比賽對台灣社會的影響，下列敘述何者最符合文章觀點？",
+        options: [
+          "主要影響是讓便利商店業績大增，促進了短期經濟消費。",
+          "讓原本支持不同隊伍的人們放下隔閡，產生強烈的集體認同感。",
+          "讓更多小學生決定未來要以打棒球為職業。",
+          "證明了台灣的棒球場地設備已經超越日本水準。"
+        ],
+        answer: 1
+      },
+      {
+        question: "隊長陳傑憲說「我們不比任何人差」，這句話在當時的情境下，最主要展現了哪種精神？",
+        options: [
+          "過度自信，認為對手其實不堪一擊。",
+          "安撫人心，避免隊友因為緊張而失常。",
+          "自我肯定，在逆境中不自我懷疑的堅韌信念。",
+          "挑戰權威，想要推翻裁判的判決。"
+        ],
+        answer: 2
+      },
+      {
+        question: "若要為這篇文章下一個最精準的標題，下列哪個選項最能涵蓋「比賽過程」與「社會影響」兩個層面？",
+        options: [
+          "4比0完封日本：中華隊的戰術分析",
+          "便利商店優惠齊發：全民歡慶冠軍時刻",
+          "從被看衰到世界冠軍：凝聚台灣心的榮耀全壘打",
+          "隊長陳傑憲的名言錄與生平故事"
+        ],
+        answer: 2
+      }
+    ]
+  },
+  {
+    id: 2,
+    title: "地球發燒了：COP29 氣候峰會",
+    category: "環境教育 / 能源",
+    icon: <Leaf className="w-6 h-6 text-white" />,
+    color: "bg-green-500",
+    content: `想像一下，如果你發燒了，身體會很不舒服，需要看醫生、吃藥才能好起來。現在，我們的地球也「發燒」了，而且燒得越來越嚴重。為了幫地球退燒，世界各國的領袖最近聚集在亞塞拜然，舉行了一場名為「COP29」的聯合國氣候峰會。這就像是一場全球性的「地球醫生大會診」，大家要一起討論怎麼救救這個生病的星球。
+
+今年的會議重點非常實際，那就是——「錢」。你可能會好奇，救地球為什麼要談錢？這是因為要對抗氣候變遷，需要花很多錢來蓋太陽能發電廠、研發新科技，或是幫助那些因為氣候災難而無家可歸的人。這裡還有一個關於「公平」的問題：許多工業發達的大國（像美國、歐洲國家），過去幾百年來為了發展經濟，排放了大量的廢氣（溫室氣體），是造成地球暖化的主要兇手。
+
+然而，受害最深的卻往往是那些排放量很少的窮困小國或海島國家。例如太平洋上的一些小島，因為地球暖化導致海平面上升，他們的家園快要被海水淹沒了；又或者像非洲的一些國家，面臨嚴重的乾旱，農作物種不出來，人民沒飯吃。這就是所謂的「氣候正義」——製造問題的人，是不是應該負起更多責任，出錢幫助受害者呢？這成為了會議中爭論不休的話題。
+
+雖然大人們為了錢吵架，但會議還是達成了一些共識，比如要加快速度減少使用石油、煤炭這些會產生汙染的能源，改用風力、太陽能等綠色能源。對我們小學生來說，雖然不能去參加聯合國會議，但我們在生活中也能當個「地球小醫生」。比如隨手關燈、不浪費食物、少用一次性塑膠製品，這些小小的舉動，匯集起來也能幫助地球降溫喔！`,
+    questions: [
+      {
+        question: "文章中提到的「氣候正義」，核心爭議點在於什麼？",
+        options: [
+          "富國與窮國對於「誰該負責出錢解決氣候問題」的觀點不同。",
+          "各國對於「地球到底有沒有暖化」這件事還沒有科學共識。",
+          "開發中國家希望繼續使用煤炭，但已開發國家不允許。",
+          "聯合國的會議地點選擇不公平，導致部分國家無法參加。"
+        ],
+        answer: 0
+      },
+      {
+        question: "為什麼文章說海島國家受害最深？下列哪個原因最符合文意？",
+        options: [
+          "因為他們的醫療設備落後，無法治療熱帶疾病。",
+          "因為他們排放的溫室氣體最多，所以自食惡果。",
+          "因為他們地理位置低窪，最直接面臨海平面上升的滅國危機。",
+          "因為他們過度依賴觀光業，氣候變遷導致遊客減少。"
+        ],
+        answer: 2
+      },
+      {
+        question: "此次 COP29 會議中，各國領袖就像「地球醫生」，而他們開出的「處方箋（解決方案）」主要包含什麼？",
+        options: [
+          "全面停止工廠運作，讓地球休息十年。",
+          "加速能源轉型，減少化石燃料並增加綠色能源的使用。",
+          "將住在海邊的居民全部遷移到高山上居住。",
+          "發明超大型冷氣機，直接對著大氣層吹冷氣。"
+        ],
+        answer: 1
+      },
+      {
+        question: "身為小學生，下列哪項行動最能實質呼應「減碳救地球」的精神？",
+        options: [
+          "使用再生紙，並落實隨手關燈與節約用水。",
+          "要求父母開車接送上下學，避免自己在路上吸廢氣。",
+          "多吃進口的高級水果，支持全球農產品貿易。",
+          "把舊玩具全部丟掉買新的，促進經濟循環。"
+        ],
+        answer: 0
+      },
+      {
+        question: "為什麼「談錢」在氣候峰會上如此困難？",
+        options: [
+          "因為各國使用的貨幣不同，匯率換算很麻煩。",
+          "因為沒有人知道蓋一座太陽能發電廠需要多少錢。",
+          "因為這涉及國家利益分配，富國不願承擔過多賠償責任。",
+          "因為科學家還沒計算出氣候變遷造成的實際損失金額。"
+        ],
+        answer: 2
+      }
+    ]
+  },
+  {
+    id: 3,
+    title: "聽見孩子的聲音：世界兒童人權日",
+    category: "人權教育 / 法治",
+    icon: <Users className="w-6 h-6 text-white" />,
+    color: "bg-blue-500",
+    content: `你知道嗎？每年的11月20日是一個屬於你們的日子——「世界兒童人權日」。這一天是為了紀念聯合國在1989年通過了《兒童權利公約》。這份公約非常重要，它就像是一面堅固的盾牌，保護著全世界所有未滿18歲的兒童和青少年。在這份公約出現之前，很多人認為小孩只是父母的財產或附屬品，大人說什麼，小孩就只能聽什麼。
+
+但《兒童權利公約》告訴全世界：兒童是獨立的個體，擁有自己的人權！這些權利包含了四大原則：首先是「生存權」，每個孩子都有權利獲得足夠的食物、醫療，好好地長大；其次是「受保護權」，孩子不應該受到暴力、虐待或任何形式的傷害；第三是「發展權」，這包括了受教育、玩遊戲以及從事休閒活動的權利。
+
+最後，也是最常被忽略的，叫做「參與權」（或稱表意權）。這意味著，只要是跟你有關的事情，大人都應該聽聽你的意見。例如，學校要制定新的班規，不應該只是老師說了算，應該讓同學們一起討論；政府要蓋一座新的公園，也應該問問小朋友想玩什麼樣的遊樂設施。
+
+在台灣，我們也越來越重視這一點。過去大人常說「囝仔人有耳無嘴」（小孩子只帶耳朵聽，不要多說話），這觀念已經過時了！現在我們鼓勵孩子勇敢表達想法。當然，表達意見不代表可以無理取鬧，而是要學習理性地說出自己的需求，並且尊重別人的看法。當我們學會為自己發聲，同時也傾聽他人，這就是民主素養的第一步。`,
+    questions: [
+      {
+        question: "文章提到《兒童權利公約》就像一面「盾牌」，這個比喻的意思是？",
+        options: [
+          "公約是一份可以用來攻擊壞人的法律武器。",
+          "公約能為兒童抵擋來自成人世界不當的對待與傷害。",
+          "公約是用金屬做成的，非常堅固。",
+          "公約主要功能是讓兒童在遊戲時不受傷。"
+        ],
+        answer: 1
+      },
+      {
+        question: "關於「表意權（參與權）」，下列哪種解讀是正確的？",
+        options: [
+          "只要是小孩提出的要求，大人都必須無條件答應。",
+          "小孩可以隨意打斷大人的談話，發表自己的意見。",
+          "在涉及兒童權益的事務上，應提供兒童表達意見的機會並予以重視。",
+          "只有成績好的小孩才有資格發表意見。"
+        ],
+        answer: 2
+      },
+      {
+        question: "「囝仔人有耳無嘴」這句俗諺反映了過去哪種錯誤的兒童觀？",
+        options: [
+          "認為兒童的聽力比表達能力更重要，要多訓練聽力。",
+          "認為兒童尚未成熟，不具備獨立思考與表達意見的資格。",
+          "認為沈默是金，不說話的孩子才是最聰明的。",
+          "認為多說話會讓孩子分心，無法專注於課業。"
+        ],
+        answer: 1
+      },
+      {
+        question: "當我們行使「表意權」時，文章強調必須伴隨什麼樣的素養？",
+        options: [
+          "要能大聲辯論，直到對方認輸為止。",
+          "要能引用法律條文，讓大人無法反駁。",
+          "要能理性表達需求，並同時尊重他人的觀點。",
+          "要能聯合其他同學，用多數暴力來爭取權益。"
+        ],
+        answer: 2
+      },
+      {
+        question: "下列哪個場景最符合「落實兒童參與權」的精神？",
+        options: [
+          "爸爸媽媽直接幫小孩報名了所有的才藝班，因為這是為他好。",
+          "學校午餐菜單由營養師與學生代表共同討論後決定。",
+          "老師規定全班同學必須遵守統一的髮型規定。",
+          "市政府在蓋公園時，只諮詢了附近里長的意見。"
+        ],
+        answer: 1
+      }
+    ]
+  },
+  {
+    id: 4,
+    title: "斑馬線上的守護者：交通安全新生活",
+    category: "安全教育 / 法治",
+    icon: <Shield className="w-6 h-6 text-white" />,
+    color: "bg-red-500",
+    content: `這一年來，走在台灣的街頭，你是否發現有些事情悄悄改變了？以前過馬路時，行人總是戰戰兢兢，要等車子先過才敢走；但現在，越來越多的汽車和機車會在斑馬線前停下來，揮手讓行人先過。這不是魔法，而是因為台灣正在努力擺脫「行人地獄」這個不好聽的稱號。
+
+為了保護行人，政府修改了法律，加重了罰則。現在，如果車輛在經過斑馬線時不禮讓行人，駕駛最高會被罰款6000元，還要去上交通安全講習課。這項政策實施一年多來，雖然一開始有些駕駛覺得不習慣、甚至抱怨不方便，但數據會說話——路口的嚴重車禍確實減少了。這體現了一個很重要的現代觀念，叫做「人本交通」。
+
+什麼是「人本交通」？簡單來說，就是道路的設計和規則，應該以「人」的安全和便利為最優先考量，而不是以「車」跑得快不快為主。畢竟，人是肉做的，車是鐵做的，一旦發生碰撞，受傷的永遠是人。
+
+不過，身為行人的我們，有了法律的保護衣，是不是就可以隨便走了呢？當然不是！權利與義務是對等的。我們在過馬路時，不能當「低頭族」一直滑手機，要專心觀察路況；要走在斑馬線上，不可以隨意穿越馬路或闖紅燈。只有當駕駛願意禮讓，行人也遵守規則、快速通過，大家互相尊重，我們的馬路才會真正變得安全又友善。`,
+    questions: [
+      {
+        question: "「人本交通」的核心理念與下列何者相反？",
+        options: [
+          "道路設計應優先保護弱勢用路人的安全。",
+          "車輛流暢度與速度優於行人的安全與便利。",
+          "透過法律規範來約束強勢交通工具的行為。",
+          "改善行人穿越設施，減少事故發生率。"
+        ],
+        answer: 1
+      },
+      {
+        question: "政府加重罰則後，雖然有駕駛抱怨，但主要成效為何？",
+        options: [
+          "國庫收入大幅增加，解決了財政赤字問題。",
+          "路口嚴重車禍的發生率確實下降了。",
+          "行人變得更加傲慢，故意在路中間逗留。",
+          "車輛行駛速度變慢，導致城市交通全面癱瘓。"
+        ],
+        answer: 1
+      },
+      {
+        question: "文章提到「人是肉做的，車是鐵做的」，這句話主要想表達什麼概念？",
+        options: [
+          "說明人體結構與機械結構的差異。",
+          "強調在交通事故中，行人處於極度脆弱的劣勢，因此需要更多保護。",
+          "暗示開車的人比較冷血，走路的人比較有感情。",
+          "解釋為什麼汽車需要定期保養，而人需要運動。"
+        ],
+        answer: 1
+      },
+      {
+        question: "即使有法律保障，行人為什麼仍不應在過馬路時滑手機？",
+        options: [
+          "因為手機螢幕在陽光下看不清楚，容易近視。",
+          "因為這是對駕駛的一種挑釁行為。",
+          "因為法律無法物理性地阻擋車輛，行人仍需保持警覺以防萬一（防禦性行走）。",
+          "因為這樣會走得太慢，被警察開罰單。"
+        ],
+        answer: 2
+      },
+      {
+        question: "理想的交通環境需要建立在什麼基礎之上？",
+        options: [
+          "駕駛與行人互相尊重，且雙方都遵守規則。",
+          "完全依賴警察在每一個路口站崗指揮。",
+          "將行人和車輛完全隔離，例如全部改走地下道。",
+          "給予行人無限的路權，車輛必須無條件停止。"
+        ],
+        answer: 0
+      }
+    ]
+  },
+  {
+    id: 5,
+    title: "金馬獎：電影裡的多元世界",
+    category: "多元文化 / 藝術涵養",
+    icon: <Zap className="w-6 h-6 text-white" />,
+    color: "bg-purple-500",
+    content: `第61屆金馬獎頒獎典禮在11月23日盛大舉行。你可能在電視上看過金馬獎，那是一個星光熠熠的夜晚，許多明星穿著漂亮的禮服走紅毯。但金馬獎之所以重要，不只是因為有明星，而是因為它被譽為「華語電影的奧斯卡」，是所有電影工作者心中的最高榮譽殿堂。
+
+今年的金馬獎特別精彩，因為入圍的作品非常「多元」。有來自台灣在地的故事，也有來自香港、中國、新加坡、馬來西亞等地的電影。這顯示了金馬獎的一個核心價值：包容。在這裡，電影不分國界，只看藝術的好壞。
+
+電影不只是娛樂消遣，它更像是一扇「窗戶」。透過這扇窗，我們可以看見別人的生活，理解那些我們平常接觸不到的世界。例如，有的電影探討貧窮家庭的困境，讓我們學會同理心；有的電影講述女性在社會上面臨的不公平，讓我們思考性別平等；有的電影則呈現原住民的語言與文化，讓我們看見台灣的美麗與哀愁。
+
+獲得最佳劇情片的導演在台上說了一句很棒的話：「電影是自由的。」這句話的意思是，創作不應該受到政治或權力的限制，每個人都有權利說出自己的故事。金馬獎最珍貴的地方，就在於它守護了這份自由，讓各種不同的聲音——無論是大聲的、小聲的、快樂的、悲傷的——都能被世界聽見。`,
+    questions: [
+      {
+        question: "文章將電影比喻為「窗戶」，主要想強調電影的哪項功能？",
+        options: [
+          "娛樂功能：讓人放鬆心情，暫時逃離現實壓力。",
+          "視角拓展：讓人看見不同族群的生活樣貌，增進理解與同理。",
+          "教育功能：教導觀眾歷史知識與科學常識。",
+          "商業功能：透過票房收入來促進經濟發展。"
+        ],
+        answer: 1
+      },
+      {
+        question: "金馬獎被稱為「華語電影的奧斯卡」，且強調「包容」，這展現在哪裡？",
+        options: [
+          "它接納來自不同國家與地區的華語電影作品，不設政治門檻。",
+          "它允許觀眾免費入場觀看頒獎典禮。",
+          "它鼓勵電影一定要使用昂貴的特效技術。",
+          "它規定每一部電影都必須包含台灣元素。"
+        ],
+        answer: 0
+      },
+      {
+        question: "導演所說的「電影是自由的」，主要是在反對什麼？",
+        options: [
+          "反對電影票價過高，認為應該讓大家都看得起。",
+          "反對政治審查或權力壓迫對創作內容的限制。",
+          "反對電影分級制度，認為小孩可以看任何電影。",
+          "反對外國電影進入台灣市場競爭。"
+        ],
+        answer: 1
+      },
+      {
+        question: "透過觀賞探討社會議題的電影（如貧窮、性別），我們最能學習到什麼？",
+        options: [
+          "學習如何拍攝電影的專業技術。",
+          "學習明星的穿著打扮與時尚品味。",
+          "培養換位思考的能力，對他人的處境產生共鳴。",
+          "了解電影產業的獲利模式。"
+        ],
+        answer: 2
+      },
+      {
+        question: "這篇文章的主旨最接近下列哪一句話？",
+        options: [
+          "金馬獎是明星展現時尚的舞台。",
+          "電影是守護自由與展現多元文化的重要媒介。",
+          "台灣電影產業正面臨嚴重的資金短缺問題。",
+          "看電影是最好的休閒娛樂活動。"
+        ],
+        answer: 1
+      }
+    ]
+  },
+  {
+    id: 6,
+    title: "AI 機器人：是朋友還是敵人？",
+    category: "科技教育 / 資訊",
+    icon: <Cpu className="w-6 h-6 text-white" />,
+    color: "bg-indigo-500",
+    content: `如果有一天，你有一個機器人管家，它會幫你整理房間、寫作業（雖然老師可能不答應）、甚至陪你聊天，這樣的生活是不是很酷？最近科技界最熱門的話題，就是更進化的「AI 代理人」（AI Agent）。
+
+以前的 AI，像是大家熟悉的 ChatGPT，通常是你問它一句，它回答一句，比較被動。但未來的 AI 會變得非常「主動」，像是一個超級能幹的私人秘書。你只要跟它說：「我想去日本旅行五天。」它就會自動幫你查好機票、訂好喜歡的飯店、排好所有行程，甚至幫你打包行李清單。
+
+這背後的大功臣，是運算速度超快的電腦晶片。而你可能不知道，這些讓 AI 變聰明的晶片，絕大多數都是由台灣的公司（如台積電）製造的！這也是為什麼現在全世界都說台灣是「AI 科技島」，我們應該為此感到自豪。
+
+但是，隨著 AI 越來越厲害，也有人開始擔心：「機器人會不會搶走我的工作？」、「人類會不會被機器人統治？」其實，專家告訴我們，科技始終來自於人性。AI 被發明出來是為了幫助人類，處理那些危險、重複或是無聊的工作，讓我們有更多時間去做真正重要的事情——那些需要「創意」、「情感」與「愛」的事情。未來的世界，不是要跟機器人打架，而是要學會怎麼當個好指揮家，讓 AI 成為我們最好的助手。`,
+    questions: [
+      {
+        question: "未來的「AI 代理人」與現在的 AI 相比，最大的進步在於？",
+        options: [
+          "運算速度更快，可以同時玩十個遊戲。",
+          "具備主動性，能根據模糊指令自動規劃並執行複雜任務。",
+          "外型更像人類，擁有皮膚與表情。",
+          "價格更便宜，每個人都買得起。"
+        ],
+        answer: 1
+      },
+      {
+        question: "台灣在全球 AI 發展中佔有關鍵地位，是因為？",
+        options: [
+          "台灣人使用 AI 的比例世界最高。",
+          "台灣掌握了先進晶片的製造技術，是 AI 運算的核心。",
+          "台灣政府規定學生必須學習 AI 程式設計。",
+          "台灣的機器人比賽常拿冠軍。"
+        ],
+        answer: 1
+      },
+      {
+        question: "面對 AI 可能取代工作的擔憂，文章建議我們應該培養什麼能力？",
+        options: [
+          "訓練自己做更多重複性的工作，比機器人更快。",
+          "學習如何修理機器人。",
+          "發展創意、情感交流等 AI 難以模仿的人類特質。",
+          "抵制 AI 產品，拒絕使用新科技。"
+        ],
+        answer: 2
+      },
+      {
+        question: "「科技始終來自於人性」在本文的脈絡中，意思是？",
+        options: [
+          "科技發展應以輔助人類、提升生活品質為目的，而非取代人類。",
+          "科技產品會模仿人類的缺點，變得越來越貪婪。",
+          "只有人類可以使用科技，動物不行。",
+          "科技的進步最終會讓人性消失。"
+        ],
+        answer: 0
+      },
+      {
+        question: "如果將 AI 比喻為樂器，人類的角色應該是什麼？",
+        options: [
+          "聽眾：被動接受 AI 產出的結果。",
+          "維修員：只負責修理壞掉的 AI。",
+          "指揮家：引導 AI 發揮功能，創造出美好的樂章。",
+          "競爭者：試圖演奏得比 AI 更大聲。"
+        ],
+        answer: 2
+      }
+    ]
+  },
+  {
+    id: 7,
+    title: "為什麼東西變貴了？最低工資與通膨",
+    category: "勞動教育 / 經濟",
+    icon: <TrendingUp className="w-6 h-6 text-white" />,
+    color: "bg-pink-500",
+    content: `最近跟爸爸媽媽去買東西時，你有沒有發現：巷口那家好吃的雞排漲價了？便利商店的茶葉蛋也變貴了？這種「手上的錢能買到的東西變少了」的現象，我們稱為「通貨膨脹」。
+
+為了不讓大家的薪水因為東西變貴而縮水，政府宣布從明年（2025年）開始，要調漲「最低工資」。最低工資就是法律規定老闆付給員工最少的薪水。調漲薪水聽起來是一件很棒的事，對吧？這代表打工的大哥哥大姊姊可以拿到更多錢，生活更有保障。
+
+但是，經濟學的世界是很複雜的。當老闆要付給員工更多薪水時，老闆的「成本」就增加了。為了不賠錢，老闆可能會把商品的價格提高。於是，薪水漲了，東西也跟著漲價了，這就像是一個循環。這也是為什麼有些大人會擔心，漲薪水會不會反而讓物價漲得更兇。
+
+這件事告訴我們，「金錢」的價值不是固定的，它是會變動的。對於還沒有開始賺錢的小學生來說，這給了我們什麼啟示呢？首先，我們要學習「記帳」，知道錢花去哪裡了；其次，要能區分「需要」與「想要」。水是需要的，但昂貴的玩具可能是想要的。當東西變貴時，更要學會聰明消費，把錢花在刀口上，並珍惜每一分錢的價值。`,
+    questions: [
+      {
+        question: "「通貨膨脹」對我們生活最實質的影響是？",
+        options: [
+          "錢包裡的鈔票數量會自動變少。",
+          "銀行存款的利息會大幅降低。",
+          "同樣金額的貨幣，其實質購買力下降了。",
+          "所有商品的品質都會變差。"
+        ],
+        answer: 2
+      },
+      {
+        question: "政府調漲最低工資的初衷（原本的目的）是？",
+        options: [
+          "增加企業的負擔，淘汰競爭力弱的公司。",
+          "保障勞工的基本生活水準，避免被物價上漲壓垮。",
+          "刺激民眾多多消費，促進經濟繁榮。",
+          "鼓勵大家不要工作，依賴政府補助。"
+        ],
+        answer: 1
+      },
+      {
+        question: "為什麼調漲工資有時反而會導致物價上漲？",
+        options: [
+          "因為企業將增加的人事成本轉嫁到商品售價上。",
+          "因為員工拿到錢後會瘋狂購物，導致商品缺貨。",
+          "因為政府會趁機提高稅收。",
+          "因為原物料會感應到薪水上漲而自動變貴。"
+        ],
+        answer: 0
+      },
+      {
+        question: "面對物價變貴的時代，小學生應具備的理財素養是？",
+        options: [
+          "要求父母增加零用錢以維持原本的生活享受。",
+          "因為錢會貶值，所以拿到錢要趕快花掉。",
+          "培養分辨「需要」與「想要」的能力，理性消費。",
+          "學習如何投資股票，賺取更多零用錢。"
+        ],
+        answer: 2
+      },
+      {
+        question: "這篇文章主要想傳達的經濟學概念循環是？",
+        options: [
+          "物價上漲 -> 大家不買東西 -> 經濟蕭條。",
+          "物價上漲 -> 調漲薪水 -> 企業成本增加 -> 物價可能再上漲。",
+          "調漲薪水 -> 企業賺錢 -> 商品降價 -> 大家開心。",
+          "政府發錢 -> 大家有錢 -> 物價下跌 -> 生活美好。"
+        ],
+        answer: 1
+      }
+    ]
+  },
+  {
+    id: 8,
+    title: "守護健康：疫苗與防疫",
+    category: "健康教育 / 戶外教育",
+    icon: <Heart className="w-6 h-6 text-white" />,
+    color: "bg-rose-500",
+    content: `當時序進入秋冬，天氣變冷了，除了要多加件外套，還有一件重要的事情要注意：流感病毒和新冠病毒開始出來「開派對」了！最近衛生所和學校都在鼓勵大家接種疫苗。有些同學一聽到要打針，臉都嚇白了，覺得好痛好可怕。但是，這短短一秒鐘像螞蟻咬一下的痛，卻可以換來一整年的保護力，其實是非常划算的交易喔！
+
+你知道疫苗是怎麼工作的嗎？它的原理很有趣，就像是給身體的免疫系統軍隊「看照片」。疫苗裡面含有失去活性的病毒片段（就像病毒的照片），打進身體後，我們的免疫系統會說：「喔！原來壞人長這樣！」於是開始演練怎麼打敗它。等到真正的病毒入侵時，身體的軍隊早就準備好了，能馬上認出來並消滅它，這樣我們就不會生重病了。
+
+打疫苗不只是為了保護自己，更是一種「愛的表現」。這叫做「群體免疫」。想像一下，如果班上大部份的同學都打了疫苗，病毒就找不到人可以傳染，那麼那些因為身體太虛弱、或是年紀太小不能打疫苗的人（比如家裡的小寶寶或生病的阿公阿嬤），也會因此受到保護。所以，照顧好自己的健康，其實也是一種對社會負責、保護家人的英雄行為呢！`,
+    questions: [
+      {
+        question: "文章用「給免疫系統看照片」來比喻疫苗的什麼機制？",
+        options: [
+          "疫苗會讓身體產生幻覺，以為病毒來了。",
+          "讓身體預先識別病毒特徵，產生抗體記憶，以便未來快速防禦。",
+          "疫苗會破壞病毒的相機功能，讓病毒無法複製。",
+          "讓白血球視力變好，更能看清楚細菌。"
+        ],
+        answer: 1
+      },
+      {
+        question: "關於「群體免疫」，下列敘述何者正確？",
+        options: [
+          "只要班上有一半的人生病，另一半人就安全了。",
+          "當高比例的人口具有免疫力，病毒傳播鏈會被阻斷，進而保護弱勢群體。",
+          "這是一種不需要打疫苗就能獲得免疫力的自然療法。",
+          "是指大家聚在一起互相傳染，以此增強抵抗力。"
+        ],
+        answer: 1
+      },
+      {
+        question: "為什麼說打疫苗是「對社會負責」？",
+        options: [
+          "因為這樣可以減少自身傳染給他人的風險，降低醫療負擔。",
+          "因為疫苗很貴，打了才不會浪費國家的錢。",
+          "因為這樣才能拿到疫苗接種卡，去餐廳吃飯有打折。",
+          "因為這是一種服從權威的表現。"
+        ],
+        answer: 0
+      },
+      {
+        question: "除了接種疫苗，秋冬防疫還需要注意什麼？",
+        options: [
+          "多吃高熱量食物以增加脂肪厚度。",
+          "保持室內完全密閉，不讓冷風和病毒吹進來。",
+          "勤洗手、戴口罩，並保持良好的衛生習慣。",
+          "盡量不要運動，以保存體力對抗病毒。"
+        ],
+        answer: 2
+      },
+      {
+        question: "面對打針的恐懼，文章建議的正面心態是？",
+        options: [
+          "告訴自己這一切都是假的，閉上眼睛逃避現實。",
+          "思考長遠的利益：短暫的疼痛換來長期的健康與家人的安全。",
+          "大聲尖叫以釋放壓力，讓護理師嚇一跳。",
+          "要求父母給予高額的獎勵金才願意配合。"
+        ],
+        answer: 1
+      }
+    ]
+  },
+  {
+    id: 9,
+    title: "國際好朋友：美國大選後的台灣",
+    category: "國際教育 / 政治",
+    icon: <Globe className="w-6 h-6 text-white" />,
+    color: "bg-sky-500",
+    content: `前陣子，美國剛舉辦完總統大選，選出了新任總統川普。這是一件超級大的國際新聞，全世界都在關注。你可能會想：「美國在地球的另一邊，他們選總統跟我們台灣小學生有什麼關係？」其實，關係可大了！
+
+美國就像是台灣在國際上最重要的一位「大朋友」。我們有很多生意往來，比如台灣最厲害的半導體晶片，很多都是賣給美國的科技公司；而台灣為了保護自己，也會跟美國購買飛機、坦克等防衛武器。所以，美國的新總統換人了，他可能會改變做生意的方法，或是改變對待朋友的態度。例如，新總統如果決定提高「關稅」（就像是過路費），那麼台灣賣東西去美國就會變貴，台灣的工廠可能就會賺比較少錢，這會影響到台灣的經濟。
+
+面對這樣的情況，台灣該怎麼辦呢？聰明的作法是「分散風險」。就像媽媽去買菜，雞蛋不會全部放在同一個籃子裡，因為萬一籃子破了，雞蛋就全碎了。台灣也不能只靠美國這個朋友，政府正在努力跟更多國家（如歐洲國家、日本、東南亞國家）交朋友、做生意。
+
+對於我們來說，這告訴我們要有「國際觀」。世界是連在一起的，發生在遠方的事情，可能會影響到我們的生活。保持好奇心，多了解世界發生什麼事，未來的變局才不會讓我們手忙腳亂。`,
+    questions: [
+      {
+        question: "「雞蛋不能全放在同一個籃子裡」在外交策略上的意思是？",
+        options: [
+          "應該要購買更多武器來保護自己。",
+          "不應過度依賴單一國家，要建立多元的國際夥伴關係以分散風險。",
+          "應該要對所有國家保持距離，採取孤立政策。",
+          "雞蛋很脆弱，所以外交態度要非常軟弱。"
+        ],
+        answer: 1
+      },
+      {
+        question: "如果美國提高對台灣的「關稅」，可能的直接後果是？",
+        options: [
+          "台灣商品在美國變貴，銷量可能下降，影響台灣廠商獲利。",
+          "台灣商品在美國變便宜，大家搶著買。",
+          "美國人會更喜歡台灣，因為關稅代表品質保證。",
+          "對台灣完全沒有影響，因為距離很遠。"
+        ],
+        answer: 0
+      },
+      {
+        question: "台灣向美國購買武器，主要考量是什麼？",
+        options: [
+          "為了展示財力，讓世界知道台灣很有錢。",
+          "為了參加國際閱兵比賽，爭取名次。",
+          "為了提升國防實力，嚇阻潛在的軍事威脅。",
+          "因為美國強迫推銷，我們不敢拒絕。"
+        ],
+        answer: 2
+      },
+      {
+        question: "面對國際局勢的變動，文章建議台灣應該採取什麼策略？",
+        options: [
+          "完全聽從美國的指示，不要有自己的意見。",
+          "壯大自身實力（如科技、經濟），並廣結善緣。",
+          "關起門來不跟外國做生意，自給自足。",
+          "與所有大國斷交，保持中立。"
+        ],
+        answer: 1
+      },
+      {
+        question: "為什麼小學生也需要培養「國際觀」？",
+        options: [
+          "因為全球化時代，國際大事往往會連動影響到我們的生活與經濟。",
+          "因為這樣考試才能考高分，受到老師稱讚。",
+          "因為可以跟外國網友炫耀自己懂很多。",
+          "因為外國的月亮比較圓，我們要崇拜外國。"
+        ],
+        answer: 0
+      }
+    ]
+  },
+  {
+    id: 10,
+    title: "反霸凌月：每個人都值得被溫柔對待",
+    category: "品德教育 / 法治",
+    icon: <Users className="w-6 h-6 text-white" />,
+    color: "bg-orange-500",
+    content: `學校應該是一個快樂學習的地方，但有時候，這裡也會出現令人難過的陰影，那就是「霸凌」。雖然11月沒有特定的反霸凌日，但這始終是校園裡最重要的議題。霸凌不只是像哆啦A夢裡的胖虎打大雄那樣的「肢體霸凌」，還包括罵人難聽的話（言語霸凌）、聯合大家不理他（關係霸凌），還有現在最可怕的「網路霸凌」。
+
+隨著大家都有了手機，「網路霸凌」變得越來越嚴重。有些人躲在螢幕後面，以為匿名就可以隨便罵人，或者散播同學的醜照、私密訊息。要注意喔！這些行為在法律上都是犯法的！而且，網路上的字句一旦送出，就很難完全消除，這對受害者造成的心理傷痕，可能比身體受傷還要痛、還要久。
+
+在霸凌事件中，通常有三種人：欺負人的「霸凌者」、被欺負的「受害者」，以及在旁邊看的「旁觀者」。很多時候，旁觀者因為害怕自己也被欺負，所以選擇沈默。但是，你的沈默可能會讓霸凌者覺得「大家都不反對我」，於是變本加厲。
+
+我們鼓勵大家從「旁觀者」變成「挺身者」。這不需要你跟霸凌者打架，你只需要做一點點：比如私下關心受傷的同學，問一句「你還好嗎？」；或者勇敢地告訴老師和家長。這小小的善意，就像黑暗中的一道光，能拯救一顆受傷的心。請記住，善良是一種選擇，也是世界上最強大的力量。`,
+    questions: [
+      {
+        question: "下列哪種行為屬於「關係霸凌」？",
+        options: [
+          "在體育課時故意用球丟同學。",
+          "偷藏同學的課本讓他找不到。",
+          "利用同儕壓力，聯合其他人刻意排擠、孤立某位同學。",
+          "在網路上留言罵同學是笨豬。"
+        ],
+        answer: 2
+      },
+      {
+        question: "為什麼「網路霸凌」往往比傳統霸凌更難以遏止？",
+        options: [
+          "因為網路訊號常常不穩定，很難追蹤。",
+          "因為具備匿名性、傳播速度快且24小時無休的特性。",
+          "因為警察不抓網路上的壞人。",
+          "因為網路霸凌不會造成身體受傷，所以比較不嚴重。"
+        ],
+        answer: 1
+      },
+      {
+        question: "對於「旁觀者」的角色，文章提出了什麼觀點？",
+        options: [
+          "旁觀者的沈默可能會被霸凌者解讀為默許，助長霸凌氣焰。",
+          "旁觀者應該加入霸凌，以免自己成為下一個目標。",
+          "旁觀者最重要的任務是錄影上傳，讓大家公審。",
+          "旁觀者與霸凌事件無關，不需要負任何責任。"
+        ],
+        answer: 0
+      },
+      {
+        question: "如何成為一名「挺身者」？下列哪個行動是適當且安全的？",
+        options: [
+          "直接跟霸凌者單挑，用拳頭解決問題。",
+          "私下給予受害者關心與支持，並尋求師長協助。",
+          "在網路上發動網軍攻擊霸凌者，以暴制暴。",
+          "當作沒看到，明哲保身。"
+        ],
+        answer: 1
+      },
+      {
+        question: "「善良是一種選擇」這句話想傳達的核心價值是？",
+        options: [
+          "人天生就是善良的，不需要學習。",
+          "我們有能力決定自己的行為，選擇不傷害人並伸出援手，是勇氣的表現。",
+          "善良的人通常比較軟弱，容易被欺負。",
+          "只有有錢人才有資格選擇善良。"
+        ],
+        answer: 1
+      }
+    ]
+  },
+  {
+    id: 11,
+    title: "小心！手機裡的陷阱：網路防詐騙",
+    category: "資訊教育 / 安全",
+    icon: <Lock className="w-6 h-6 text-white" />,
+    color: "bg-slate-500",
+    content: `現在幾乎每個同學都會用手機玩遊戲或看影片，但你知道嗎？網路世界雖然好玩，卻也藏著許多看不見的陷阱。最近，針對學生族群的「網路詐騙」變得越來越多。詐騙集團很聰明，他們不會把「我是壞人」寫在臉上，而是會偽裝成好康的事情來誘惑你。
+
+最常見的陷阱就是「免費送遊戲點數」或「虛擬寶物」。你可能在網路上看到有人說：「只要幫我點這個連結，就送你超強裝備！」或是「加入群組，免費領取造型！」一旦你點了連結，可能會被植入病毒，手機裡的資料就被偷走了；或者他會騙你把爸媽的手機號碼給他，結果害爸媽收到巨額的帳單。
+
+還有一種是「假交友」。網路上有些陌生人會裝作很關心你，聽你說心事，讓你覺得他是最好的朋友，然後慢慢騙你要私密照片，或是叫你匯錢給他。這就像是披著羊皮的狼，非常危險。
+
+要怎麼保護自己呢？請記住這句咒語：「不貪心、不輕信、不亂點」。天底下沒有白吃的午餐，太好的事情通常都是假的。如果遇到奇怪的要求，一定要先告訴爸媽或老師。保護自己的資訊安全，就像出門要鎖門一樣重要，別讓壞人有機可乘！`,
+    questions: [
+      {
+        question: "詐騙集團通常利用人性的哪個弱點來誘騙學生點擊連結？",
+        options: [
+          "利用「好奇心」與「探索未知」的求知慾。",
+          "利用「貪小便宜」的心態，用免費寶物或點數當作誘餌。",
+          "利用「同情心」，假裝自己很可憐需要幫助。",
+          "利用「榮譽感」，說點了就會變成第一名。"
+        ],
+        answer: 1
+      },
+      {
+        question: "關於「網路連結」，下列哪種觀念是正確的資安素養？",
+        options: [
+          "只要是朋友傳來的連結就一定安全，可以直接點。",
+          "不明來源的連結可能含有病毒或釣魚網站，應保持警覺不亂點。",
+          "連結看起來很短（短網址）就代表是安全的。",
+          "只要手機有裝保護殼，點什麼連結都不會中毒。"
+        ],
+        answer: 1
+      },
+      {
+        question: "為什麼絕對不能將私密照片傳給網友？",
+        options: [
+          "因為手機拍照功能不好，照片會很模糊。",
+          "因為照片可能會被對方存檔，變成勒索威脅的把柄。",
+          "因為這樣會佔用對方的雲端空間。",
+          "因為要洗出來寄給對方比較有誠意。"
+        ],
+        answer: 1
+      },
+      {
+        question: "文章中的防詐咒語「不輕信」，具體是指？",
+        options: [
+          "不要相信任何人，包括父母老師。",
+          "對於網路上過於美好或未經查證的資訊，保持懷疑態度。",
+          "不要相信書本上的知識。",
+          "不要相信自己的直覺。"
+        ],
+        answer: 1
+      },
+      {
+        question: "如果不幸遭到詐騙，最正確的處理方式是？",
+        options: [
+          "覺得丟臉不敢說，自己偷偷想辦法解決。",
+          "把手機藏起來，假裝手機不見了。",
+          "保持冷靜，保留對話證據，立刻告知家長並撥打165專線。",
+          "直接跟詐騙集團嗆聲，說要報警抓他（可能會激怒對方）。"
+        ],
+        answer: 2
+      }
+    ]
+  },
+  {
+    id: 12,
+    title: "古老的歌謠：原住民文化的復振",
+    category: "多元文化 / 歷史",
+    icon: <Music className="w-6 h-6 text-white" />,
+    color: "bg-teal-500",
+    content: `台灣是一座美麗的寶島，這塊土地上不只有漢人，還有早在幾千年前就居住在這裡的「原住民族」。目前政府認定的原住民族有16族，像是阿美族、泰雅族、排灣族等，每一族都有自己獨特的語言、服飾、傳說和美麗的歌謠。
+
+然而，在過去很長一段時間裡，因為外來文化的強勢，許多原住民的文化慢慢流失了。有些原住民小朋友不會說自己的母語，甚至不敢承認自己是原住民。這就像是一棵大樹，如果忘記了自己的根，葉子就會慢慢枯黃。
+
+幸好，近年來大家開始意識到「文化傳承」的重要。現在學校裡有族語課，讓孩子重新學習阿公阿嬤的話；還有許多年輕人回到部落，向長老學習傳統的編織、狩獵智慧，並將古老的歌謠結合現代流行音樂，唱給全世界聽。例如知名的歌手阿爆（阿仍仍），就用排灣族語創作出超好聽的音樂，還拿下了金曲獎大獎！
+
+這告訴我們，傳統並不老土，它是最珍貴的寶藏。台灣最美的地方，就在於我們的「多元」。就像彩虹有七種顏色才美麗，台灣因為有閩南、客家、原住民、新住民等不同族群的文化互相輝映，才顯得如此豐富精彩。尊重並欣賞每一個族群的文化，是我們身為台灣公民最重要的素養。`,
+    questions: [
+      {
+        question: "文章用「大樹與根」的比喻，意在強調什麼？",
+        options: [
+          "樹根越深，大樹就長得越高壯，代表經濟發展。",
+          "文化是族群的根本與養分，失去文化認同，族群生命力將枯竭。",
+          "原住民居住在深山裡，與大自然共存。",
+          "我們要多種樹，保護森林環境。"
+        ],
+        answer: 1
+      },
+      {
+        question: "造成過去原住民文化流失的歷史因素是？",
+        options: [
+          "原住民覺得自己的文化跟不上時代，主動拋棄。",
+          "受到強勢主流文化的壓抑與同化，導致語言習俗斷層。",
+          "因為氣候變遷導致部落不斷遷徙，無法保存文物。",
+          "因為原住民沒有文字，所以無法記錄歷史。"
+        ],
+        answer: 1
+      },
+      {
+        question: "歌手阿爆的成功經驗證明了什麼？",
+        options: [
+          "傳統文化與現代流行是對立的，只能二選一。",
+          "透過創新融合，傳統文化也能展現強大的魅力與自信。",
+          "原住民音樂一定要翻譯成英文才能走向國際。",
+          "做音樂是為了賺錢，跟文化傳承無關。"
+        ],
+        answer: 1
+      },
+      {
+        question: "「台灣最美的地方在於多元」，這句話反映了哪種社會價值？",
+        options: [
+          "不同族群文化並存且相互尊重，豐富了社會的樣貌。",
+          "台灣有很多種不同的地形與氣候。",
+          "每個人都要長得不一樣，才不會認錯人。",
+          "社會應該只有一種聲音，才不會吵架。"
+        ],
+        answer: 0
+      },
+      {
+        question: "小學生實踐「多元文化素養」的具體作法是？",
+        options: [
+          "覺得別人的文化很奇怪，並加以嘲笑。",
+          "只跟自己文化背景相同的人做朋友。",
+          "抱持開放心態，主動了解並欣賞不同族群的文化。",
+          "強迫別人都來學習自己的文化。"
+        ],
+        answer: 2
+      }
+    ]
+  }
+];
+
+export default function WeeklyNewsQuiz() {
+  const [currentScreen, setCurrentScreen] = useState('home'); // home, reading, quiz, result
+  const [selectedArticle, setSelectedArticle] = useState(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [showArticleInMobile, setShowArticleInMobile] = useState(true);
+  const [currentDate, setCurrentDate] = useState('');
+  const [quizHistory, setQuizHistory] = useState({}); // Format: { articleId: { score: 100, completed: true } }
+
+  // Initialize
+  useEffect(() => {
+    // Set Date
+    const date = new Date();
+    const formattedDate = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+    setCurrentDate(formattedDate);
+
+    // Load History
+    const savedHistory = localStorage.getItem('newsQuizHistory');
+    if (savedHistory) {
+      try {
+        setQuizHistory(JSON.parse(savedHistory));
+      } catch (e) {
+        console.error("Failed to parse history", e);
+      }
+    }
+  }, []);
+
+  const saveResult = (articleId, finalScore) => {
+    const newHistory = {
+      ...quizHistory,
+      [articleId]: {
+        score: Math.max(finalScore, quizHistory[articleId]?.score || 0),
+        completed: true,
+        lastPlayed: new Date().toISOString()
+      }
+    };
+    setQuizHistory(newHistory);
+    localStorage.setItem('newsQuizHistory', JSON.stringify(newHistory));
+  };
+
+  const startReading = (article) => {
+    setSelectedArticle(article);
+    setCurrentScreen('reading');
+  };
+
+  const startQuiz = () => {
+    setCurrentScreen('quiz');
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setShowFeedback(false);
+  };
+
+  const handleAnswer = (optionIndex) => {
+    const currentQuestion = selectedArticle.questions[currentQuestionIndex];
+    const correct = optionIndex === currentQuestion.answer;
+    
+    setIsCorrect(correct);
+    setShowFeedback(true);
+    
+    if (correct) {
+      setScore(prev => prev + 20);
+    }
+  };
+
+  const nextQuestion = () => {
+    setShowFeedback(false);
+    if (currentQuestionIndex < 4) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      // Quiz finished
+      // The score state is already updated in handleAnswer
+      // Use the score directly because handleAnswer has already run and updated the score for the current question
+      saveResult(selectedArticle.id, score);
+      setCurrentScreen('result');
+    }
+  };
+
+  const goHome = () => {
+    setCurrentScreen('home');
+    setSelectedArticle(null);
+  };
+
+  const Header = () => (
+    <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-4 text-white shadow-lg sticky top-0 z-20 border-b-4 border-yellow-400">
+      <div className="max-w-7xl mx-auto flex justify-between items-center">
+        <h1 className="text-xl md:text-2xl font-bold flex items-center gap-2">
+          <BookOpen className="w-8 h-8" />
+          <div className="flex flex-col md:flex-row md:items-baseline gap-0 md:gap-2">
+            <span>小學生數位閱讀網</span>
+            <span className="text-blue-200 text-sm font-normal">{currentDate}</span>
+          </div>
+        </h1>
+        {currentScreen !== 'home' && (
+          <button onClick={goHome} className="text-sm bg-white/20 px-4 py-2 rounded-full hover:bg-white/30 transition font-bold flex items-center gap-1">
+            <Home className="w-4 h-4" /> 回首頁
+          </button>
+        )}
+      </div>
+    </div>
+  );
+
+  const ArticleCard = ({ article }) => {
+    const history = quizHistory[article.id];
+    const isCompleted = history?.completed;
+    const highScore = history?.score || 0;
+    
+    return (
+      <div 
+        onClick={() => startReading(article)}
+        className={`relative bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col justify-between h-full group overflow-hidden border-2 
+          ${isCompleted ? 'border-green-400' : 'border-gray-200 hover:border-blue-400'}
+        `}
+      >
+        {/* Status Ribbon/Badge Area */}
+        {isCompleted ? (
+          <div className="absolute top-0 right-0 z-10">
+             <div className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl shadow-md flex items-center gap-1">
+               <CheckCircle className="w-4 h-4" /> 已完成
+             </div>
+          </div>
+        ) : (
+          <div className="absolute top-0 right-0 z-10">
+             <div className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-bl-xl shadow-md flex items-center gap-1 animate-pulse">
+               <AlertCircle className="w-4 h-4" /> 尚未閱讀
+             </div>
+          </div>
+        )}
+
+        {/* Content */}
+        <div className="p-6">
+          <div className="flex justify-between items-start mb-4 mt-2">
+            <div className={`p-3 rounded-lg shadow-sm ${article.color}`}>
+              {article.icon}
+            </div>
+            <span className="text-xs font-bold text-gray-500 bg-gray-100 px-2 py-1 rounded mt-1">
+              {article.category}
+            </span>
+          </div>
+          <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+            {article.title}
+          </h3>
+          
+          {/* Score Display for Completed Items */}
+          {isCompleted && (
+            <div className="mt-3 bg-green-50 rounded-lg p-2 flex items-center justify-between border border-green-200">
+               <span className="text-xs text-green-700 font-bold uppercase tracking-wider">最高得分</span>
+               <span className="text-xl font-black text-green-600">{highScore}分</span>
+            </div>
+          )}
+        </div>
+        
+        {/* Footer Action */}
+        <div className={`p-4 border-t ${isCompleted ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100 group-hover:bg-blue-50 group-hover:border-blue-100'}`}>
+           {isCompleted ? (
+             <div className="flex items-center justify-center text-green-700 font-bold text-sm">
+                <RefreshCcw className="w-4 h-4 mr-2" /> 再次複習
+             </div>
+           ) : (
+             <div className="flex items-center justify-center text-blue-600 font-bold text-sm">
+                開始閱讀挑戰 <ChevronRight className="w-4 h-4 ml-1" />
+             </div>
+           )}
+        </div>
+      </div>
+    );
+  };
+
+  const ReadingView = () => (
+    <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg mt-6 animate-fade-in border-t-8 border-blue-500">
+      <div className="flex items-center gap-4 mb-6 border-b pb-4">
+        <div className={`p-3 rounded-lg ${selectedArticle.color}`}>
+           {selectedArticle.icon}
+        </div>
+        <h2 className="text-3xl font-bold text-gray-800">{selectedArticle.title}</h2>
+      </div>
+      
+      <div className="prose prose-lg text-gray-700 leading-relaxed mb-8 whitespace-pre-line">
+        {selectedArticle.content}
+      </div>
+
+      <button 
+        onClick={startQuiz}
+        className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-2xl py-5 rounded-xl font-bold hover:shadow-lg transition transform hover:scale-[1.01] flex items-center justify-center gap-3 shadow-blue-200 group"
+      >
+        <TrendingUp className="w-8 h-8 group-hover:animate-bounce" />
+        開始測驗 (滿分100分)
+      </button>
+    </div>
+  );
+
+  const QuizView = () => {
+    const question = selectedArticle.questions[currentQuestionIndex];
+    return (
+      <div className="max-w-7xl mx-auto mt-6 grid grid-cols-1 lg:grid-cols-2 gap-8 items-start h-[calc(100vh-140px)]">
+        
+        {/* Left Column: Article Content */}
+        <div className={`bg-white p-6 rounded-xl shadow-lg h-full overflow-y-auto border-2 border-gray-100 ${showArticleInMobile ? 'block' : 'hidden lg:block'}`}>
+          <div className="flex justify-between items-center mb-4 border-b pb-2 sticky top-0 bg-white z-10">
+            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+               <BookOpen className="w-5 h-5 text-blue-600" /> 文章閱讀區
+            </h3>
+            <span className="text-sm text-gray-500 hidden lg:inline bg-yellow-100 text-yellow-800 px-2 py-1 rounded">請根據左側文章回答</span>
+          </div>
+          <div className="prose prose-lg text-gray-700 leading-relaxed whitespace-pre-line">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">{selectedArticle.title}</h2>
+            {selectedArticle.content}
+          </div>
+        </div>
+
+        {/* Right Column: Quiz Interface */}
+        <div className="flex flex-col h-full overflow-y-auto">
+          {/* Mobile Toggle Button */}
+          <button 
+            onClick={() => setShowArticleInMobile(!showArticleInMobile)}
+            className="lg:hidden mb-4 bg-white p-3 rounded-lg shadow text-blue-600 font-bold flex items-center justify-center gap-2 w-full border border-blue-100"
+          >
+            {showArticleInMobile ? <EyeOff className="w-5 h-5"/> : <Eye className="w-5 h-5"/>}
+            {showArticleInMobile ? "隱藏文章 (專心作答)" : "顯示文章 (查找答案)"}
+          </button>
+
+          <div className="bg-white p-8 rounded-xl shadow-lg relative flex-grow border-2 border-blue-50">
+            {/* Progress Bar */}
+            <div className="flex justify-between text-sm text-gray-500 mb-2 font-bold">
+              <span>第 {currentQuestionIndex + 1} 題 / 共 5 題</span>
+              <span className="text-blue-600">目前得分: {score}</span>
+            </div>
+            <div className="w-full bg-gray-200 h-3 rounded-full mb-8">
+              <div 
+                className="bg-blue-500 h-3 rounded-full transition-all duration-500 ease-out" 
+                style={{ width: `${((currentQuestionIndex + 1) / 5) * 100}%` }}
+              ></div>
+            </div>
+
+            <h3 className="text-xl font-bold text-gray-800 mb-8 leading-relaxed">
+              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded mr-2 text-sm align-middle">Q{currentQuestionIndex+1}</span>
+              {question.question}
+            </h3>
+
+            <div className="space-y-4">
+              {question.options.map((option, idx) => (
+                <button
+                  key={idx}
+                  disabled={showFeedback}
+                  onClick={() => handleAnswer(idx)}
+                  className={`w-full text-left p-5 rounded-xl border-2 transition-all text-lg group relative
+                    ${showFeedback 
+                      ? idx === question.answer 
+                        ? 'border-green-500 bg-green-50 text-green-900 font-bold shadow-md'
+                        : idx === currentQuestionIndex 
+                          ? 'border-gray-200 opacity-50'
+                          : 'border-gray-200 opacity-50'
+                      : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50 hover:shadow-md'
+                    }
+                    ${showFeedback && idx !== question.answer && !isCorrect && 'opacity-50'} 
+                  `}
+                >
+                  <span className="mr-3 font-bold text-gray-400 group-hover:text-blue-500">
+                    {String.fromCharCode(65 + idx)}.
+                  </span>
+                  {option}
+                  {showFeedback && idx === question.answer && (
+                    <CheckCircle className="absolute right-4 top-1/2 transform -translate-y-1/2 text-green-500 w-6 h-6" />
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {showFeedback && (
+              <div className={`mt-8 p-6 rounded-xl flex flex-col items-center gap-4 animate-fade-in border-2 ${isCorrect ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                <div className="flex items-center gap-3 w-full">
+                  <div className={`p-3 rounded-full ${isCorrect ? 'bg-green-100' : 'bg-red-100'}`}>
+                    {isCorrect ? <CheckCircle className="w-8 h-8 text-green-600" /> : <XCircle className="w-8 h-8 text-red-600" />}
+                  </div>
+                  <div>
+                    <p className={`font-bold text-xl ${isCorrect ? 'text-green-800' : 'text-red-800'}`}>
+                      {isCorrect ? "答對了！太棒了！" : "答錯囉！再接再厲"}
+                    </p>
+                    {isCorrect && <p className="text-green-600 font-bold">+20 分</p>}
+                    {!isCorrect && <p className="text-red-700 mt-1">正確答案是：<span className="font-bold">{String.fromCharCode(65 + question.answer)}</span></p>}
+                  </div>
+                  <button 
+                    onClick={nextQuestion}
+                    className="ml-auto bg-gray-800 text-white px-8 py-3 rounded-xl hover:bg-gray-700 transition font-bold shadow-lg transform hover:-translate-y-0.5 active:translate-y-0"
+                  >
+                    {currentQuestionIndex < 4 ? '下一題' : '看成績'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const ResultView = () => {
+    let message = "";
+    let color = "";
+    let Icon = Star;
+    
+    if (score === 100) { message = "太厲害了！你是新聞知識王！"; color = "text-yellow-500"; Icon = Award; }
+    else if (score >= 80) { message = "很棒喔！你對時事很了解！"; color = "text-green-500"; Icon = Star; }
+    else if (score >= 60) { message = "還不錯，繼續加油！"; color = "text-blue-500"; Icon = TrendingUp; }
+    else { message = "別灰心，再讀一次新聞會更好！"; color = "text-red-500"; Icon = RefreshCcw; }
+
+    return (
+      <div className="max-w-xl mx-auto mt-10 bg-white p-12 rounded-3xl shadow-2xl text-center border-4 border-gray-100">
+        <div className={`inline-block p-6 rounded-full mb-6 ${score >= 60 ? 'bg-yellow-100' : 'bg-gray-100'}`}>
+          <Icon className={`w-20 h-20 ${color}`} />
+        </div>
+        <div className={`text-7xl font-black mb-4 ${color} tracking-tighter`}>{score}<span className="text-3xl text-gray-400 ml-2">分</span></div>
+        <h3 className="text-2xl font-bold text-gray-800 mb-8">{message}</h3>
+        
+        <div className="flex flex-col gap-4">
+          <button 
+            onClick={startQuiz}
+            className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-200"
+          >
+            <RefreshCcw className="w-5 h-5" /> 再測驗一次 (刷高分)
+          </button>
+          <button 
+            onClick={goHome}
+            className="w-full bg-gray-100 text-gray-700 py-4 rounded-xl font-bold hover:bg-gray-200 transition flex items-center justify-center gap-2"
+          >
+            <Home className="w-5 h-5" /> 回到首頁選其他新聞
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-100 font-sans pb-10 selection:bg-blue-200 selection:text-blue-900">
+      <Header />
+      
+      <main className="container mx-auto px-4 mt-8">
+        {currentScreen === 'home' && (
+          <>
+             <div className="mb-8 bg-white border border-blue-100 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+               <div>
+                 <h2 className="text-2xl font-bold text-gray-800 mb-2">👋 歡迎來到數位閱讀網</h2>
+                 <p className="text-gray-600 text-lg">這裡有 12 篇最新的精選新聞。請選擇一篇感興趣的文章，閱讀後挑戰測驗，累積你的知識分數！</p>
+               </div>
+               <div className="flex gap-4">
+                 <div className="bg-red-50 px-6 py-4 rounded-xl border border-red-100 text-center min-w-[120px]">
+                    <div className="text-sm font-bold text-red-400 uppercase tracking-wider mb-1">未完成</div>
+                    <div className="text-3xl font-black text-red-500">
+                      {articles.length - Object.values(quizHistory).filter(h => h.completed).length}
+                    </div>
+                 </div>
+                 <div className="bg-green-50 px-6 py-4 rounded-xl border border-green-100 text-center min-w-[120px]">
+                    <div className="text-sm font-bold text-green-400 uppercase tracking-wider mb-1">已完成</div>
+                    <div className="text-3xl font-black text-green-500">
+                      {Object.values(quizHistory).filter(h => h.completed).length}
+                    </div>
+                 </div>
+               </div>
+             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+              {articles.map(article => (
+                <ArticleCard key={article.id} article={article} />
+              ))}
+            </div>
+          </>
+        )}
+
+        {currentScreen === 'reading' && <ReadingView />}
+        {currentScreen === 'quiz' && <QuizView />}
+        {currentScreen === 'result' && <ResultView />}
+      </main>
+    </div>
+  );
+}

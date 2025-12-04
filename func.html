@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>線性方程與不等式繪圖器</title>
+    
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 引入 React 和 ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- 引入 Babel 用於解析 JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+        }
+        /* 防止手機上滑動時觸發下拉刷新 */
+        canvas {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // 內嵌圖示組件 (取代 lucide-react 依賴)
+        const SettingsIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.39a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+        );
+
+        const InfoIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+        );
+
+        const RefreshIcon = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <path d="M21 2v6h-6"></path>
+                <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+                <path d="M3 22v-6h6"></path>
+                <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+            </svg>
+        );
+
+        const LinearGraphExplorer = () => {
+            // 模式: 'standard' (標準式) 或 'slope' (斜截式)
+            const [mode, setMode] = useState('standard');
+            
+            // 參數狀態
+            const [params, setParams] = useState({
+                a: 1,
+                b: -1,
+                c: 0,
+                m: 1,
+                k: 0,
+                sign: '=' // '=', '>', '>=', '<', '<='
+            });
+
+            const [scale, setScale] = useState(25); // 每個單位佔多少像素 (Zoom)
+            const [hoverCoord, setHoverCoord] = useState(null);
+            const canvasRef = useRef(null);
+            
+            // 初始化與參數變更時重繪
+            useEffect(() => {
+                drawGraph();
+            }, [params, mode, scale]);
+
+            const handleParamChange = (key, value) => {
+                setParams(prev => ({
+                    ...prev,
+                    [key]: value
+                }));
+            };
+
+            // 座標轉換：數學座標 -> 畫布像素
+            const toPixel = (x, y, width, height) => {
+                const cx = width / 2;
+                const cy = height / 2;
+                return {
+                    x: cx + x * scale,
+                    y: cy - y * scale // Canvas Y軸向下，數學Y軸向上，故反向
+                };
+            };
+
+            // 座標轉換：畫布像素 -> 數學座標
+            const toMath = (px, py, width, height) => {
+                const cx = width / 2;
+                const cy = height / 2;
+                return {
+                    x: (px - cx) / scale,
+                    y: (cy - py) / scale
+                };
+            };
+
+            const drawGraph = () => {
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const width = canvas.width;
+                const height = canvas.height;
+
+                // 清空畫布
+                ctx.clearRect(0, 0, width, height);
+                
+                // 繪製格線背景
+                drawGrid(ctx, width, height);
+                
+                // 繪製軸線
+                drawAxes(ctx, width, height);
+
+                // 繪製不等式區域或直線
+                drawEquation(ctx, width, height);
+            };
+
+            const drawGrid = (ctx, width, height) => {
+                ctx.strokeStyle = '#e5e7eb'; // 淺灰色
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+
+                const cx = width / 2;
+                const cy = height / 2;
+
+                // 垂直線
+                for (let x = cx % scale; x < width; x += scale) {
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, height);
+                }
+                // 水平線
+                for (let y = cy % scale; y < height; y += scale) {
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(width, y);
+                }
+                ctx.stroke();
+            };
+
+            const drawAxes = (ctx, width, height) => {
+                const cx = width / 2;
+                const cy = height / 2;
+
+                ctx.strokeStyle = '#374151'; // 深灰色
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                // X軸
+                ctx.moveTo(0, cy);
+                ctx.lineTo(width, cy);
+                // Y軸
+                ctx.moveTo(cx, 0);
+                ctx.lineTo(cx, height);
+                ctx.stroke();
+
+                // 標記數字
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                
+                // X軸刻度
+                for (let i = 1; i * scale < width / 2; i++) {
+                    ctx.fillText(i, cx + i * scale, cy + 20);
+                    ctx.fillText(-i, cx - i * scale, cy + 20);
+                }
+                
+                // Y軸刻度
+                ctx.textAlign = 'right';
+                for (let i = 1; i * scale < height / 2; i++) {
+                    ctx.fillText(i, cx - 5, cy - i * scale + 5);
+                    ctx.fillText(-i, cx - 5, cy + i * scale + 5);
+                }
+            };
+
+            const drawEquation = (ctx, width, height) => {
+                const xMin = -width / (2 * scale) - 2;
+                const xMax = width / (2 * scale) + 2;
+                const yMin = -height / (2 * scale) - 2;
+                const yMax = height / (2 * scale) + 2;
+
+                let A, B, C;
+                
+                if (mode === 'standard') {
+                    A = parseFloat(params.a);
+                    B = parseFloat(params.b);
+                    C = parseFloat(params.c);
+                } else {
+                    A = -parseFloat(params.m);
+                    B = 1;
+                    C = parseFloat(params.k);
+                }
+
+                if (isNaN(A) || isNaN(B) || isNaN(C)) return;
+                if (A === 0 && B === 0) return;
+
+                const isStrict = params.sign === '>' || params.sign === '<';
+                const isInequality = params.sign !== '=';
+                
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#2563eb';
+                if (isStrict) {
+                    ctx.setLineDash([10, 10]);
+                } else {
+                    ctx.setLineDash([]);
+                }
+
+                let p1, p2;
+                
+                if (Math.abs(B) < 0.0001) {
+                    const xVal = C / A;
+                    p1 = { x: xVal, y: yMin };
+                    p2 = { x: xVal, y: yMax };
+                } else {
+                    const y1 = (C - A * xMin) / B;
+                    const y2 = (C - A * xMax) / B;
+                    p1 = { x: xMin, y: y1 };
+                    p2 = { x: xMax, y: y2 };
+                }
+
+                const pix1 = toPixel(p1.x, p1.y, width, height);
+                const pix2 = toPixel(p2.x, p2.y, width, height);
+
+                if (isInequality) {
+                    ctx.fillStyle = 'rgba(59, 130, 246, 0.2)';
+                    ctx.beginPath();
+                    
+                    const checkPoint = (x, y) => {
+                        const val = A * x + B * y;
+                        switch (params.sign) {
+                            case '>': return val > C;
+                            case '>=': return val >= C;
+                            case '<': return val < C;
+                            case '<=': return val <= C;
+                            default: return false;
+                        }
+                    };
+
+                    const midX = (p1.x + p2.x) / 2;
+                    const midY = (p1.y + p2.y) / 2;
+                    
+                    const normLen = Math.sqrt(A*A + B*B);
+                    const nx = A / normLen;
+                    const ny = B / normLen;
+                    
+                    const testDist = 10;
+                    const testX = midX + nx * testDist;
+                    const testY = midY + ny * testDist;
+                    
+                    const isPositiveSideValid = checkPoint(testX, testY);
+                    
+                    ctx.save();
+                    ctx.beginPath();
+                    
+                    const farDist = 10000;
+                    const farX = nx * farDist * (isPositiveSideValid ? 1 : -1);
+                    const farY = ny * farDist * (isPositiveSideValid ? 1 : -1);
+
+                    const pp1 = toPixel(p1.x, p1.y, width, height);
+                    const pp2 = toPixel(p2.x, p2.y, width, height);
+                    const pp3 = toPixel(p2.x + farX, p2.y + farY, width, height);
+                    const pp4 = toPixel(p1.x + farX, p1.y + farY, width, height);
+
+                    ctx.moveTo(pp1.x, pp1.y);
+                    ctx.lineTo(pp2.x, pp2.y);
+                    ctx.lineTo(pp3.x, pp3.y);
+                    ctx.lineTo(pp4.x, pp4.y);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                ctx.beginPath();
+                ctx.moveTo(pix1.x, pix1.y);
+                ctx.lineTo(pix2.x, pix2.y);
+                ctx.stroke();
+            };
+
+            const handleMouseMove = (e) => {
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const mathCoord = toMath(x, y, canvas.width, canvas.height);
+                setHoverCoord(mathCoord);
+            };
+
+            const resetParams = () => {
+                setParams({
+                    a: 1, b: -1, c: 0,
+                    m: 1, k: 0,
+                    sign: '='
+                });
+                setMode('standard');
+                setScale(25);
+            };
+
+            const getEquationString = () => {
+                const a = parseFloat(params.a) || 0;
+                const b = parseFloat(params.b) || 0;
+                const c = parseFloat(params.c) || 0;
+                const m = parseFloat(params.m) || 0;
+                const k = parseFloat(params.k) || 0;
+                const { sign } = params;
+                
+                const displaySign = sign === '>=' ? '≥' : sign === '<=' ? '≤' : sign;
+
+                if (mode === 'standard') {
+                    let lhs = '';
+                    if (a !== 0) {
+                        if (a === 1) lhs += 'x';
+                        else if (a === -1) lhs += '-x';
+                        else lhs += `${a}x`;
+                    }
+                    if (b !== 0) {
+                        if (b > 0) {
+                            if (lhs !== '') lhs += ` + `;
+                            if (b === 1) lhs += 'y';
+                            else lhs += `${b}y`;
+                        } else {
+                            if (lhs !== '') lhs += ` - `;
+                            else lhs += '-';
+                            if (Math.abs(b) === 1) lhs += 'y';
+                            else lhs += `${Math.abs(b)}y`;
+                        }
+                    }
+                    if (a === 0 && b === 0) lhs = '0';
+                    return `${lhs} ${displaySign} ${c}`;
+                } else {
+                    let rhs = '';
+                    if (m !== 0) {
+                        if (m === 1) rhs += 'x';
+                        else if (m === -1) rhs += '-x';
+                        else rhs += `${m}x`;
+                    }
+                    if (k !== 0) {
+                        if (k > 0) {
+                            if (rhs !== '') rhs += ` + ${k}`;
+                            else rhs += `${k}`;
+                        } else {
+                            if (rhs !== '') rhs += ` - ${Math.abs(k)}`;
+                            else rhs += `-${Math.abs(k)}`;
+                        }
+                    }
+                    if (m === 0 && k === 0) rhs = '0';
+                    return `y ${displaySign} ${rhs}`;
+                }
+            };
+
+            return (
+                <div className="flex flex-col items-center w-full min-h-screen bg-gray-50 p-4 font-sans text-gray-800">
+                    <div className="max-w-4xl w-full bg-white rounded-xl shadow-lg overflow-hidden">
+                        {/* Header */}
+                        <div className="bg-blue-600 p-4 text-white flex justify-between items-center">
+                            <h1 className="text-2xl font-bold flex items-center gap-2">
+                                <SettingsIcon className="w-6 h-6" />
+                                互動式線性方程式繪圖器
+                            </h1>
+                            <button 
+                                onClick={resetParams}
+                                className="p-2 bg-blue-500 hover:bg-blue-400 rounded-full transition-colors"
+                                title="重置"
+                            >
+                                <RefreshIcon className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="flex flex-col md:flex-row">
+                            {/* Controls Panel */}
+                            <div className="w-full md:w-1/3 p-6 bg-gray-50 border-r border-gray-200 space-y-6">
+                                
+                                {/* Mode Switcher */}
+                                <div className="flex bg-gray-200 rounded-lg p-1">
+                                    <button
+                                        onClick={() => setMode('standard')}
+                                        className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
+                                            mode === 'standard' 
+                                                ? 'bg-white text-blue-600 shadow-sm' 
+                                                : 'text-gray-600 hover:text-gray-800'
+                                        }`}
+                                    >
+                                        標準式
+                                    </button>
+                                    <button
+                                        onClick={() => setMode('slope')}
+                                        className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-all ${
+                                            mode === 'slope' 
+                                                ? 'bg-white text-blue-600 shadow-sm' 
+                                                : 'text-gray-600 hover:text-gray-800'
+                                        }`}
+                                    >
+                                        斜截式
+                                    </button>
+                                </div>
+
+                                {/* Inputs */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-sm font-bold text-gray-700">關係符號</label>
+                                        <select 
+                                            value={params.sign}
+                                            onChange={(e) => handleParamChange('sign', e.target.value)}
+                                            className="block w-32 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-white border p-2 text-lg font-mono"
+                                        >
+                                            <option value="=">=</option>
+                                            <option value=">">&gt;</option>
+                                            <option value=">=">≥</option>
+                                            <option value="<">&lt;</option>
+                                            <option value="<=">≤</option>
+                                        </select>
+                                    </div>
+
+                                    {mode === 'standard' ? (
+                                        <>
+                                            <div className="grid grid-cols-1 gap-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">係數 A (x項)</label>
+                                                    <input 
+                                                        type="number" 
+                                                        value={params.a}
+                                                        onChange={(e) => handleParamChange('a', e.target.value)}
+                                                        className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">係數 B (y項)</label>
+                                                    <input 
+                                                        type="number" 
+                                                        value={params.b}
+                                                        onChange={(e) => handleParamChange('b', e.target.value)}
+                                                        className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">常數項 C</label>
+                                                    <input 
+                                                        type="number" 
+                                                        value={params.c}
+                                                        onChange={(e) => handleParamChange('c', e.target.value)}
+                                                        className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="grid grid-cols-1 gap-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">斜率 m</label>
+                                                    <input 
+                                                        type="number" 
+                                                        value={params.m}
+                                                        onChange={(e) => handleParamChange('m', e.target.value)}
+                                                        className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Y截距 k</label>
+                                                    <input 
+                                                        type="number" 
+                                                        value={params.k}
+                                                        onChange={(e) => handleParamChange('k', e.target.value)}
+                                                        className="w-full rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="pt-4 border-t border-gray-200">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">縮放比例 (Zoom)</label>
+                                        <input 
+                                            type="range" 
+                                            min="10" 
+                                            max="60" 
+                                            value={scale}
+                                            onChange={(e) => setScale(Number(e.target.value))}
+                                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mt-4">
+                                    <h3 className="font-bold text-blue-800 text-sm flex items-center gap-1">
+                                        <InfoIcon className="w-4 h-4" /> 提示
+                                    </h3>
+                                    <ul className="text-xs text-blue-700 mt-2 space-y-1 list-disc pl-4">
+                                        <li>方程式會隨著您輸入數字即時更新。</li>
+                                        <li>實線表示包含邊界 (≤, ≥, =)</li>
+                                        <li>虛線表示不包含邊界 (&lt;, &gt;)</li>
+                                        <li>藍色陰影為不等式的解區域</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            {/* Graph Area */}
+                            <div className="w-full md:w-2/3 p-4 flex flex-col items-center bg-white relative">
+                                
+                                {/* Equation Display */}
+                                <div className="mb-4 px-6 py-3 bg-gray-800 text-white rounded-lg shadow-md font-mono text-xl">
+                                    {getEquationString()}
+                                </div>
+
+                                <div className="relative border-2 border-gray-200 rounded-lg overflow-hidden shadow-inner cursor-crosshair">
+                                    <canvas
+                                        ref={canvasRef}
+                                        width={600}
+                                        height={500}
+                                        onMouseMove={handleMouseMove}
+                                        onMouseLeave={() => setHoverCoord(null)}
+                                        className="bg-white"
+                                    />
+                                    
+                                    {/* Coordinates Tooltip */}
+                                    {hoverCoord && (
+                                        <div className="absolute top-2 right-2 bg-black/75 text-white text-xs px-2 py-1 rounded pointer-events-none font-mono">
+                                            X: {hoverCoord.x.toFixed(1)}, Y: {hoverCoord.y.toFixed(1)}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<LinearGraphExplorer />);
+    </script>
+</body>
+</html>
